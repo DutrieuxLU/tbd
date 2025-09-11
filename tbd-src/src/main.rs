@@ -1,12 +1,18 @@
-use std::{any::Any, net::IpAddr};
+use std::env;
 
-#[warn(unused_imports)]
-use clap::Parser;
-struct Command {
-    pattern: String,
-    args: Vec<String>,
-}
 fn main() {
-    let command = std::env::args().nth(2).expect("no command given");
-    println!("{:?}", command);
+    let args: Vec<String> = env::args().collect();
+
+    let command_opt = match args.len() {
+        0 => None,
+        1 => None,
+        _ => {
+            dbg!(&args);
+            Some(&args[2])
+        }
+    };
+    let command = command_opt.expect("command issue");
+    match command {
+        =>
+    }
 }
