@@ -4,6 +4,8 @@ use std::{
     process,
 };
 
+pub mod operations;
+
 enum CommandTypes {
     Add,
     Complete,
@@ -34,11 +36,11 @@ fn main() {
         }
         let command = command.unwrap();
         match command {
-            CommandTypes::Add => tbd_add(),
-            CommandTypes::Adjust => tbd_adjust(),
-            CommandTypes::Complete => tbd_complete(),
-            CommandTypes::Help => tbd_help(),
-            CommandTypes::List => tbd_list(),
+            CommandTypes::Add => operations::tbd_add(),
+            CommandTypes::Adjust => operations::tbd_adjust(),
+            CommandTypes::Complete => operations::tbd_complete(),
+            CommandTypes::Help => operations::tbd_help(),
+            CommandTypes::List => operations::tbd_list(),
         }
     }
 }
@@ -46,6 +48,10 @@ fn main() {
 fn parse_command(command_str: &str) -> Option<CommandTypes> {
     match command_str {
         "add" | "Add" | "a" => Some(CommandTypes::Add),
+        "adjust" | "Adjust" | "adj" => Some(CommandTypes::Adjust),
+        "complete" | "Complete" | "c" => Some(CommandTypes::Complete),
+        "Help" | "help" | "h" => Some(CommandTypes::Help),
+        "List" | "list" | "l" => Some(CommandTypes::List),
         _ => None,
     }
 }
