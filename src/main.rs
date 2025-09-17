@@ -1,10 +1,7 @@
-use std::{
-    env::{self},
-    io::stdin,
-    process,
-};
+use std::{io::stdin, process};
 
 pub mod operations;
+pub mod output;
 
 enum CommandTypes {
     Add,
@@ -36,12 +33,13 @@ fn main() {
         }
         let command = command.unwrap();
         match command {
-            CommandTypes::Add => operations::tbd_add(),
-            CommandTypes::Adjust => operations::tbd_adjust(),
-            CommandTypes::Complete => operations::tbd_complete(),
-            CommandTypes::Help => operations::tbd_help(),
-            CommandTypes::List => operations::tbd_list(),
+            CommandTypes::Add => operations::tbd_add(&command_opt[1..]),
+            CommandTypes::Adjust => operations::tbd_adjust(&command_opt[1..]),
+            CommandTypes::Complete => operations::tbd_complete(&command_opt[1..]),
+            CommandTypes::Help => operations::tbd_help(&command_opt[1..]),
+            CommandTypes::List => operations::tbd_list(&command_opt[1..]),
         }
+        output::print_dash();
     }
 }
 
