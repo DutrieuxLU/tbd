@@ -1,4 +1,9 @@
-use std::{io::stdin, process};
+use std::{
+    io::{self, Write, stdin},
+    process,
+};
+
+use rusqlite::{Connection, Result};
 
 pub mod operations;
 pub mod output;
@@ -10,14 +15,16 @@ enum CommandTypes {
     List,
     Help,
 }
-static PROMPT: &str = "TODO=>";
+static PROMPT: &str = "TODO=> ";
 
-fn main() {
+fn main() -> Result<()> {
     let stdin = stdin();
     let mut command_lines = stdin.lines();
+    let conn = Connection::open("todos.db")?;
     // let args: Vec<String> = env::args().collect();
     loop {
         print!("{PROMPT}");
+        let _ = io::stdout().flush();
         let command_opt: Vec<String> = command_lines
             .next()
             .unwrap()
@@ -33,11 +40,11 @@ fn main() {
         }
         let command = command.unwrap();
         match command {
-            CommandTypes::Add => operations::tbd_add(&command_opt[1..]),
-            CommandTypes::Adjust => operations::tbd_adjust(&command_opt[1..]),
-            CommandTypes::Complete => operations::tbd_complete(&command_opt[1..]),
-            CommandTypes::Help => operations::tbd_help(&command_opt[1..]),
-            CommandTypes::List => operations::tbd_list(&command_opt[1..]),
+            CommandTypes::Add => operations::tbd_add(&conn, &command_opt[1..]),
+            CommandTypes::Adjust => operations::tbd_adjust(&conn, &command_opt[1..]),
+            CommandTypes::Complete => operations::tbd_complete(&conn, &command_opt[1..]),
+            CommandTypes::Help => operations::tbd_help(&conn, &command_opt[1..]),
+            CommandTypes::List => operations::tbd_list(&conn, &command_opt[1..]),
         }
         output::print_dash();
     }
