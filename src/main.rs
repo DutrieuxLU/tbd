@@ -5,6 +5,7 @@ use std::{
 
 use rusqlite::{Connection, Result};
 
+pub mod db;
 pub mod operations;
 pub mod output;
 
@@ -21,6 +22,8 @@ fn main() -> Result<()> {
     let stdin = stdin();
     let mut command_lines = stdin.lines();
     let conn = Connection::open("todos.db")?;
+    db::check_database_created(&conn);
+    output::print_header(&conn);
     // let args: Vec<String> = env::args().collect();
     loop {
         print!("{PROMPT}");
@@ -46,7 +49,7 @@ fn main() -> Result<()> {
             CommandTypes::Help => operations::tbd_help(&conn, &command_opt[1..]),
             CommandTypes::List => operations::tbd_list(&conn, &command_opt[1..]),
         }
-        output::print_dash();
+        output::print_dash(&conn);
     }
 }
 
