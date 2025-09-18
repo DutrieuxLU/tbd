@@ -1,3 +1,4 @@
+use colored::Colorize;
 use rusqlite::{Connection, Result};
 use std::{
     io::{self, Write, stdin},
@@ -36,7 +37,12 @@ fn main() -> Result<()> {
     let stdin = stdin();
     let mut command_lines = stdin.lines();
     let conn = Connection::open("src/db/todos.db")?;
-    db::check_database_created(&conn);
+    let db_created = db::check_database_created(&conn);
+    match db_created {
+        Err(_) => println!("{}", "Database not created => making now".red().bold()),
+        Ok(_) => println!("{}", "Database exists".green()),
+    }
+
     output::print_header(&conn);
     // let args: Vec<String> = env::args().collect();
     loop {
