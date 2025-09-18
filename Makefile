@@ -1,4 +1,5 @@
 push:
+	cargo clean
 	git add .
 	git commit -m "push"
 	git push
