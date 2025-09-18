@@ -1,13 +1,14 @@
+use rusqlite::{Connection, Result};
 use std::{
     io::{self, Write, stdin},
     process,
 };
 
-use rusqlite::{Connection, Result};
-
 pub mod db;
 pub mod operations;
 pub mod output;
+
+static PROMPT: &str = "TODO=> ";
 
 enum CommandTypes {
     Add,
@@ -16,12 +17,25 @@ enum CommandTypes {
     List,
     Help,
 }
-static PROMPT: &str = "TODO=> ";
+enum CompletionStatuses {
+    Upcoming,
+    Complete,
+    Late,
+}
+
+struct Task {
+    tid: u32,
+    tname: String,
+    due_date: String,
+    desc: String,
+    tags: Vec<String>,
+    c_status: CompletionStatuses,
+}
 
 fn main() -> Result<()> {
     let stdin = stdin();
     let mut command_lines = stdin.lines();
-    let conn = Connection::open("todos.db")?;
+    let conn = Connection::open("src/db/todos.db")?;
     db::check_database_created(&conn);
     output::print_header(&conn);
     // let args: Vec<String> = env::args().collect();
