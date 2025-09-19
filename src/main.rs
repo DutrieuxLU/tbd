@@ -23,12 +23,13 @@ enum CompletionStatuses {
     Upcoming,
     Complete,
     Late,
+    Unkown,
 }
 
 struct Task {
     tid: u32,
     tname: String,
-    due_date: DateTime<Local>,
+    due_date: Option<DateTime<Local>>,
     desc: String,
     tags: Vec<String>,
     c_status: CompletionStatuses,
@@ -82,7 +83,7 @@ impl Task {
         Task {
             tid: 0,
             tname: String::new(),
-            due_date: Local::now(),
+            due_date: Some(Local::now()),
             desc: String::new(),
             tags: Vec::new(),
             c_status: CompletionStatuses::Upcoming,
