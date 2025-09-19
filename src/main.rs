@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local, Utc};
 use colored::Colorize;
 use rusqlite::{Connection, Result};
 use std::{
@@ -27,7 +28,7 @@ enum CompletionStatuses {
 struct Task {
     tid: u32,
     tname: String,
-    due_date: String,
+    due_date: DateTime<Local>,
     desc: String,
     tags: Vec<String>,
     c_status: CompletionStatuses,
@@ -48,26 +49,18 @@ fn main() -> Result<()> {
     loop {
         print!("{PROMPT}");
         let _ = io::stdout().flush();
-        let command_opt: Vec<String> = command_lines
-            .next()
-            .unwrap()
-            .unwrap()
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect();
-
-        let command = parse_command(&command_opt[0]);
-        if command.is_none() {
+        let command = command_lines.next().unwrap();
+        if command.is_err() {
             println!("Error in command parsing! Exiting");
             process::exit(1);
         }
-        let command = command.unwrap();
+        let command = parse_command(command.unwrap().as_str()).unwrap();
         match command {
-            CommandTypes::Add => operations::tbd_add(&conn, &command_opt[1..]),
-            CommandTypes::Adjust => operations::tbd_adjust(&conn, &command_opt[1..]),
-            CommandTypes::Complete => operations::tbd_complete(&conn, &command_opt[1..]),
-            CommandTypes::Help => operations::tbd_help(&conn, &command_opt[1..]),
-            CommandTypes::List => operations::tbd_list(&conn, &command_opt[1..]),
+            CommandTypes::Add => operations::tbd_add(&conn),
+            CommandTypes::Adjust => operations::tbd_adjust(&conn),
+            CommandTypes::Complete => operations::tbd_complete(&conn),
+            CommandTypes::Help => operations::tbd_help(&conn),
+            CommandTypes::List => operations::tbd_list(&conn),
         }
         output::print_dash(&conn);
     }
@@ -81,5 +74,18 @@ fn parse_command(command_str: &str) -> Option<CommandTypes> {
         "Help" | "help" | "h" => Some(CommandTypes::Help),
         "List" | "list" | "l" => Some(CommandTypes::List),
         _ => None,
+    }
+}
+
+impl Task {
+    pub fn new() -> Self {
+        Task {
+            tid: 0,
+            tname: String::new(),
+            due_date: Local::now(),
+            desc: String::new(),
+            tags: Vec::new(),
+            c_status: CompletionStatuses::Upcoming,
+        }
     }
 }
