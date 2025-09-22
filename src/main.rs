@@ -19,13 +19,23 @@ enum CommandTypes {
     List,
     Help,
 }
-enum CompletionStatuses {
+pub enum CompletionStatuses {
     Upcoming,
     Complete,
     Late,
-    Unkown,
+    Unknown,
 }
 
+impl CompletionStatuses {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::Upcoming => "Unkown",
+            Self::Complete => "Complete",
+            Self::Late => "Late",
+            Self::Unknown => "Upcoming",
+        }
+    }
+}
 struct Task {
     tid: u32,
     tname: String,
@@ -34,7 +44,18 @@ struct Task {
     tags: Vec<String>,
     c_status: CompletionStatuses,
 }
-
+impl Task {
+    pub fn new() -> Self {
+        Task {
+            tid: 0,
+            tname: String::new(),
+            due_date: Some(Local::now()),
+            desc: String::new(),
+            tags: Vec::new(),
+            c_status: CompletionStatuses::Upcoming,
+        }
+    }
+}
 fn main() -> Result<()> {
     let stdin = stdin();
     let mut command_lines = stdin.lines();
@@ -75,18 +96,5 @@ fn parse_command(command_str: &str) -> Option<CommandTypes> {
         "Help" | "help" | "h" => Some(CommandTypes::Help),
         "List" | "list" | "l" => Some(CommandTypes::List),
         _ => None,
-    }
-}
-
-impl Task {
-    pub fn new() -> Self {
-        Task {
-            tid: 0,
-            tname: String::new(),
-            due_date: Some(Local::now()),
-            desc: String::new(),
-            tags: Vec::new(),
-            c_status: CompletionStatuses::Upcoming,
-        }
     }
 }

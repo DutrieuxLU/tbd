@@ -45,11 +45,31 @@ pub fn tbd_add(conn: &Connection) {
         .split_whitespace()
         .map(|s| s.to_string().to_lowercase())
         .collect();
-    let curr_time = Local::now();
-    current_task.c_status = match &current_task.due_date {
-        Some(dd) => CompletionStatuses::Upcoming,
-        None => crate::CompletionStatuses::Unkown,
-    }
+    // status
+    current_task.c_status = match current_task.due_date {
+        Some(dd) => {
+            if dd < Local::now() {
+                CompletionStatuses::Late
+            } else {
+                CompletionStatuses::Upcoming
+            }
+        }
+        None => crate::CompletionStatuses::Unknown,
+    };
+    let due_date_str: Option<String> = current_task.due_date.map(|local_dt| local_dt.to_rfc3339());
+    conn.execute(
+        "
+        INSERT INTO tasks (?1, ?2, ?3, ?4, ?5, ?6)
+    ",
+        (
+            &current_task.tid,
+            &current_task.tname,
+            &due_date_str,
+            &current_task.desc,
+            &current_task.tags,
+            &current_task.c_status.as_str(),
+        ),
+    );
 }
 pub fn tbd_adjust(conn: &Connection) {}
 pub fn tbd_complete(conn: &Connection) {}
