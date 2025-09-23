@@ -14,5 +14,15 @@ pub fn check_database_created(conn: &Connection) -> Result<()> {
         );",
         (),
     )?;
+    let _ = conn.execute(
+        "
+            CREATE TABLE task_tags (
+                id INTEGER PRIMARY KEY,
+                task_id INTEGER NOT NULL,   
+                tag TEXT NOT NULL,
+                FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );",
+        (),
+    )?;
     Ok(())
 }
