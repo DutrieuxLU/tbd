@@ -36,3 +36,14 @@ pub fn print_all(conn: &Connection) {
         );
     }
 }
+
+pub fn print_help() {
+    println!("{}", "Usage:".bright_green());
+    println!("  tbd [command] [arguments]");
+    println!("{}", "\nCommands:".bright_green());
+    println!("  add [task name] -d [due date] -t [tags] -s [status] -i [description]    Add a new task");
+    println!("  ls                                                                      List all tasks");
+    println!("  update [task id] -n [new task name] -d [new due date] -t [new tags] -s [new status] -i [new description]    Update a task");
+    println!("  rm [task id]                                                            Remove a task");
+    println!("  help                                                                    Show this help message");
+}

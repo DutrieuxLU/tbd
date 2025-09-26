@@ -92,6 +92,7 @@ fn main() -> Result<()> {
         print!("{PROMPT}");
         let _ = io::stdout().flush();
         let command = command_lines.next().unwrap();
+        dbg!(&command);
         if command.is_err() {
             println!("Error in command parsing! Exiting");
             process::exit(1);

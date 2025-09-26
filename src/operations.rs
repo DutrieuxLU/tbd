@@ -93,7 +93,9 @@ pub fn tbd_remove(conn: &Connection) {
 }
 
 pub fn tbd_complete(conn: &Connection) {}
-pub fn tbd_help(conn: &Connection) {}
+pub fn tbd_help(conn: &Connection) {
+    output::print_help();
+}
 pub fn tbd_list(conn: &Connection) {
     output::print_all(conn);
 }
