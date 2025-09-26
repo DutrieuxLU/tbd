@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use colored::Colorize;
 use rusqlite::{Connection, Result, Row};
 use std::{
@@ -18,6 +18,7 @@ enum CommandTypes {
     Adjust,
     List,
     Help,
+    Remove,
 }
 pub enum CompletionStatuses {
     Upcoming,
@@ -29,40 +30,49 @@ pub enum CompletionStatuses {
 impl CompletionStatuses {
     pub fn as_str(&self) -> &str {
         match self {
-            Self::Upcoming => "Unkown",
+            Self::Upcoming => "Upcoming",
             Self::Complete => "Complete",
             Self::Late => "Late",
-            Self::Unknown => "Upcoming",
+            Self::Unknown => "Unknown",
+        }
+    }
+    pub fn from_str(s: &str) -> Self {
+        match s {
+            "Upcoming" => Self::Upcoming,
+            "Complete" => Self::Complete,
+            "Late" => Self::Late,
+            _ => Self::Unknown,
         }
     }
 }
-struct Task {
-    tid: u32,
-    tname: String,
-    due_date: Option<DateTime<Local>>,
-    desc: String,
-    tags: Vec<String>,
-    c_status: CompletionStatuses,
+pub struct Task {
+    pub tid: u32,
+    pub tname: String,
+    pub due_date: Option<String>,
+    pub desc: String,
+    pub tags: Vec<String>,
+    pub c_status: CompletionStatuses,
 }
 impl Task {
     pub fn new() -> Self {
         Task {
             tid: 0,
             tname: String::new(),
-            due_date: Some(Local::now()),
+            due_date: Some(Local::now().to_string()),
             desc: String::new(),
             tags: Vec::new(),
             c_status: CompletionStatuses::Upcoming,
         }
     }
     pub fn from_row(row: &Row) -> Result<Task> {
+        let tags_str: String = row.get("Tags")?;
         Ok(Task {
             tid: row.get("Tid")?,
             tname: row.get("Name")?,
             due_date: row.get("Due_Date")?,
-            desc: row.get("Description"),
-            tags: (),
-            c_status: (),
+            desc: row.get("Description")?,
+            tags: tags_str.split(',').map(|s| s.to_string()).collect(),
+            c_status: CompletionStatuses::from_str(&row.get::<_, String>("Completion_Status")?),
         })
     }
 }
@@ -93,6 +103,7 @@ fn main() -> Result<()> {
             CommandTypes::Complete => operations::tbd_complete(&conn),
             CommandTypes::Help => operations::tbd_help(&conn),
             CommandTypes::List => operations::tbd_list(&conn),
+            CommandTypes::Remove => operations::tbd_remove(&conn),
         }
         output::print_dash(&conn);
     }
@@ -105,6 +116,7 @@ fn parse_command(command_str: &str) -> Option<CommandTypes> {
         "complete" | "Complete" | "c" => Some(CommandTypes::Complete),
         "Help" | "help" | "h" => Some(CommandTypes::Help),
         "List" | "list" | "l" => Some(CommandTypes::List),
+        "remove" | "Remove" | "r" => Some(CommandTypes::Remove),
         _ => None,
     }
 }

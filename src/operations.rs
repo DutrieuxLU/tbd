@@ -4,7 +4,7 @@ use chrono::{Local, NaiveDateTime, TimeZone};
 use colored::Colorize;
 use rusqlite::Connection;
 
-use crate::{CompletionStatuses, Task};
+use crate::{CompletionStatuses, Task, output};
 
 pub fn tbd_add(conn: &Connection) {
     let stdin = io::stdin();
@@ -29,7 +29,7 @@ pub fn tbd_add(conn: &Connection) {
         None
     } else {
         match NaiveDateTime::parse_from_str(dd_str.as_str(), "%m/%d/%Y %H:%M") {
-            Ok(naive_dt) => Local.from_local_datetime(&naive_dt).single(),
+            Ok(naive_dt) => Some(Local.from_local_datetime(&naive_dt).unwrap().to_string()),
             Err(_) => {
                 println!("Invalid format! Please use MM/DD/YYYY HH:MM");
                 None
@@ -46,9 +46,10 @@ pub fn tbd_add(conn: &Connection) {
         .map(|s| s.to_string().to_lowercase())
         .collect();
     // status
+    let due_date_str: Option<String> = current_task.due_date.clone();
     current_task.c_status = match current_task.due_date {
         Some(dd) => {
-            if dd < Local::now() {
+            if dd < Local::now().to_string() {
                 CompletionStatuses::Late
             } else {
                 CompletionStatuses::Upcoming
@@ -56,13 +57,9 @@ pub fn tbd_add(conn: &Connection) {
         }
         None => crate::CompletionStatuses::Unknown,
     };
-    let due_date_str: Option<String> = current_task.due_date.map(|local_dt| local_dt.to_rfc3339());
     let _ = conn.execute(
-        "
-        INSERT INTO tasks (?1, ?2, ?3, ?4, ?5, ?6)
-    ",
+        "INSERT INTO tasks (Name, Due_Date, Description, Tags, Completion_Status) VALUES (?1, ?2, ?3, ?4, ?5)",
         (
-            &current_task.tid,
             &current_task.tname,
             &due_date_str,
             &current_task.desc,
@@ -73,9 +70,9 @@ pub fn tbd_add(conn: &Connection) {
 }
 pub fn tbd_adjust(conn: &Connection) {}
 pub fn tbd_remove(conn: &Connection) {
-    print_all(conn);
+    output::print_all(conn);
     println!("type the id of the item you would like to remove");
-    let remove_id = stdin()
+    let remove_id: u32 = stdin()
         .lines()
         .next()
         .unwrap()
@@ -83,12 +80,20 @@ pub fn tbd_remove(conn: &Connection) {
         .trim()
         .parse()
         .unwrap();
-    match conn.execute("DELETE FROM tasks where TASK_ID = ?1", remove_id) {
-        Ok(update) => println!("Task with ID:{remove_id} deleted"),
+    match conn.execute("DELETE FROM tasks where Tid = ?1", [remove_id]) {
+        Ok(updated) => {
+            if updated == 0 {
+                println!("No task with ID:{remove_id} found")
+            } else {
+                println!("Task with ID:{remove_id} deleted")
+            }
+        }
         Err(err) => println!("Error when removing task: {err}"),
     };
 }
 
 pub fn tbd_complete(conn: &Connection) {}
 pub fn tbd_help(conn: &Connection) {}
-pub fn tbd_list(conn: &Connection) {}
+pub fn tbd_list(conn: &Connection) {
+    output::print_all(conn);
+}
