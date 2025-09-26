@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, stdin};
 
 use chrono::{Local, NaiveDateTime, TimeZone};
 use colored::Colorize;
@@ -57,7 +57,7 @@ pub fn tbd_add(conn: &Connection) {
         None => crate::CompletionStatuses::Unknown,
     };
     let due_date_str: Option<String> = current_task.due_date.map(|local_dt| local_dt.to_rfc3339());
-    conn.execute(
+    let _ = conn.execute(
         "
         INSERT INTO tasks (?1, ?2, ?3, ?4, ?5, ?6)
     ",
@@ -66,12 +66,29 @@ pub fn tbd_add(conn: &Connection) {
             &current_task.tname,
             &due_date_str,
             &current_task.desc,
-            &current_task.tags,
+            &current_task.tags.join(","),
             &current_task.c_status.as_str(),
         ),
     );
 }
 pub fn tbd_adjust(conn: &Connection) {}
+pub fn tbd_remove(conn: &Connection) {
+    print_all(conn);
+    println!("type the id of the item you would like to remove");
+    let remove_id = stdin()
+        .lines()
+        .next()
+        .unwrap()
+        .unwrap()
+        .trim()
+        .parse()
+        .unwrap();
+    match conn.execute("DELETE FROM tasks where TASK_ID = ?1", remove_id) {
+        Ok(update) => println!("Task with ID:{remove_id} deleted"),
+        Err(err) => println!("Error when removing task: {err}"),
+    };
+}
+
 pub fn tbd_complete(conn: &Connection) {}
 pub fn tbd_help(conn: &Connection) {}
 pub fn tbd_list(conn: &Connection) {}
