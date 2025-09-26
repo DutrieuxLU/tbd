@@ -29,9 +29,7 @@ pub fn print_all(conn: &Connection) {
             "{} | {} | {} | {} | {} | {}",
             task.tid,
             task.tname,
-            task.due_date
-                .map(|dt| dt.format("%m/%d/%Y %H:%M").to_string())
-                .unwrap_or_else(|| "No due date".to_string()),
+            task.due_date.unwrap_or_else(|| "No due date".to_string()),
             task.desc,
             task.tags.join(", "),
             task.c_status.as_str()
