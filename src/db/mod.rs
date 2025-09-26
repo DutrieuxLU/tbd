@@ -5,7 +5,7 @@ pub fn check_database_created(conn: &Connection) -> Result<()> {
     let _ = conn.execute(
         "
             CREATE TABLE IF NOT EXISTS tasks (
-                Task_ID            INTEGER PRIMARY KEY,
+                Tid                INTEGER PRIMARY KEY,
                 Name               TEXT NOT NULL,
                 Due_Date           DATETIME,
                 Description        TEXT,

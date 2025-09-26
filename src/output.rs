@@ -16,5 +16,5 @@ pub fn print_header(conn: &Connection) {
 }
 pub fn print_all(conn: &Connection) -> Result<()> {
     let mut table = conn.prepare("SELECT * FROM tasks")?;
-    let rows = table.query_map([], |row| )
+    let rows = table.query_map([], |row| {});
 }

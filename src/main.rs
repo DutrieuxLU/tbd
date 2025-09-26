@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local, Utc};
 use colored::Colorize;
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, Result, Row};
 use std::{
     io::{self, Write, stdin},
     process,
@@ -54,6 +54,16 @@ impl Task {
             tags: Vec::new(),
             c_status: CompletionStatuses::Upcoming,
         }
+    }
+    pub fn from_row(row: &Row) -> Result<Task> {
+        Ok(Task {
+            tid: row.get("Tid")?,
+            tname: row.get("Name")?,
+            due_date: row.get("Due_Date")?,
+            desc: row.get("Description"),
+            tags: (),
+            c_status: (),
+        })
     }
 }
 fn main() -> Result<()> {
